@@ -15,8 +15,8 @@ export type VerifyCommandInput = {
 };
 
 const verifyPayload: VerifyCommandInput = {
-  action: "test-action", // This is your action ID from the Developer Portal
-  signal: "",
+  action: "learn_bitcoin", // Updated to match the action in page.tsx
+  signal: process.env.NEXT_PUBLIC_APP_ID,
   verification_level: VerificationLevel.Orb, // Orb | Device
 };
 
