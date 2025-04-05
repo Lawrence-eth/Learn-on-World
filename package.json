@@ -13,11 +13,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@worldcoin/idkit": "^2.0.2",
     "@worldcoin/minikit-js": "^1.8.0",
     "eruda": "^3.2.3",
     "next": "^14.2.26",
-    "next-auth": "^4.24.7",
     "react": "^18",
     "react-dom": "^18",
     "viem": "^2.23.5"
