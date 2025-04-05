@@ -6,36 +6,45 @@ import { bitcoinLessons } from "./data/bitcoinLessons";
 export default function Home() {
   const [currentSection, setCurrentSection] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isWorldApp, setIsWorldApp] = useState(false);
 
   useEffect(() => {
-    console.log("MiniKit is installed:", MiniKit.isInstalled());
-    console.log("User agent:", navigator.userAgent);
+    // Check if we're in World App environment
+    const checkWorldApp = () => {
+      const isInstalled = MiniKit.isInstalled();
+      setIsWorldApp(isInstalled);
+      console.log("Is World App environment:", isInstalled);
+      console.log("App ID:", process.env.NEXT_PUBLIC_APP_ID);
+    };
+    
+    checkWorldApp();
   }, []);
 
   // Handle sign-in
   const handleSignIn = async () => {
-    console.log("Attempting sign in...");
-    console.log("MiniKit is installed:", MiniKit.isInstalled());
-    
-    if (MiniKit.isInstalled()) {
-      try {
-        console.log("Starting verification...");
-        const result = await MiniKit.commands.verify({
-          signal: process.env.NEXT_PUBLIC_APP_ID || "",
-          action: "learn_bitcoin"
-        });
-        
-        console.log("Verification result:", result);
-        if (result) {
-          setIsAuthenticated(true);
-          console.log("Signed in successfully!");
-        }
-      } catch (error) {
-        console.error("Verification failed:", error);
-      }
-    } else {
-      console.error("MiniKit not detected in environment");
+    if (!isWorldApp) {
       alert("Please open this app in World App to sign in.");
+      return;
+    }
+
+    try {
+      const appId = process.env.NEXT_PUBLIC_APP_ID;
+      if (!appId) {
+        throw new Error("App ID is not configured. Please check your environment variables.");
+      }
+
+      const result = await MiniKit.commands.verify({
+        signal: appId,
+        action: "learn_bitcoin"
+      });
+      
+      if (result) {
+        setIsAuthenticated(true);
+        console.log("Signed in successfully!");
+      }
+    } catch (error) {
+      console.error("Verification failed:", error);
+      alert("Verification failed. Please try again.");
     }
   };
 
@@ -50,6 +59,11 @@ export default function Home() {
         >
           Sign In with World ID
         </button>
+        {!isWorldApp && (
+          <p className="text-red-500 mt-2">
+            Please open this app in World App to sign in.
+          </p>
+        )}
       </main>
     );
   }
