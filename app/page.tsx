@@ -6,31 +6,28 @@ import { bitcoinLessons } from "./data/bitcoinLessons";
 export default function Home() {
   const [currentSection, setCurrentSection] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isWorldApp, setIsWorldApp] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if we're in World App environment
-    const checkWorldApp = () => {
-      const isInstalled = MiniKit.isInstalled();
-      setIsWorldApp(isInstalled);
-      console.log("Is World App environment:", isInstalled);
-      console.log("App ID:", process.env.NEXT_PUBLIC_APP_ID);
-    };
-    
-    checkWorldApp();
+    const isWorldApp = MiniKit.isInstalled();
+    if (!isWorldApp) {
+      setError("Please open this app in World App to sign in.");
+    }
   }, []);
 
   // Handle sign-in
   const handleSignIn = async () => {
-    if (!isWorldApp) {
-      alert("Please open this app in World App to sign in.");
-      return;
-    }
-
     try {
+      if (!MiniKit.isInstalled()) {
+        setError("Please open this app in World App to sign in.");
+        return;
+      }
+
       const appId = process.env.NEXT_PUBLIC_APP_ID;
       if (!appId) {
-        throw new Error("App ID is not configured. Please check your environment variables.");
+        setError("App ID is not configured. Please check your environment variables.");
+        return;
       }
 
       const result = await MiniKit.commands.verify({
@@ -40,11 +37,11 @@ export default function Home() {
       
       if (result) {
         setIsAuthenticated(true);
-        console.log("Signed in successfully!");
+        setError(null);
       }
     } catch (error) {
       console.error("Verification failed:", error);
-      alert("Verification failed. Please try again.");
+      setError("Verification failed. Please try again.");
     }
   };
 
@@ -59,9 +56,9 @@ export default function Home() {
         >
           Sign In with World ID
         </button>
-        {!isWorldApp && (
-          <p className="text-red-500 mt-2">
-            Please open this app in World App to sign in.
+        {error && (
+          <p className="text-red-500 mt-2 text-center max-w-md">
+            {error}
           </p>
         )}
       </main>
