@@ -12,7 +12,7 @@ export default function Home() {
     if (MiniKit.isInstalled()) {
       try {
         const result = await MiniKit.commands.verify({
-          signal: "your-app-id-here", // Replace with your App ID
+          signal: process.env.NEXT_PUBLIC_APP_ID || "", // Use environment variable
           action: "learn_bitcoin"
         });
         
